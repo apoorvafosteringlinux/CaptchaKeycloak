@@ -1,9 +1,10 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <title>Login</title>
     <link rel="stylesheet" type="text/css" href="${url.resourcesPath}/css/styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script>
 </head>
 <body>
     <div id="kc-login">
@@ -11,11 +12,12 @@
         <form id="kc-form-login" action="${url.loginAction}" method="post">
             <div>
                 <label for="username">${msg("username")}</label>
-                <input type="text" id="username" name="username" autofocus autocomplete="off">
+                <input type="text" id="username" name="username" autofocus autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
             </div>
             <div>
                 <label for="password">${msg("password")}</label>
-                <input type="password" id="password" name="password" autocomplete="off">
+                <input type="password" id="password" name="password" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+            
             </div>
             <div>
                 <label for="captcha">${msg("Captcha")}</label>
@@ -32,14 +34,29 @@
                 </div>
             </div>
             <div>
-                <input type="submit" id="login-button" value="${msg("login")}" disabled>
+                <button type="button"  id="login-button" disabled>${msg("login")}</button>
+                        
             </div>
         </form>
     </div>
-    <script src="${url.resourcesPath}/js/script.js"></script>
+<script src="${url.resourcesPath}/js/script.js"></script>
     <script type="text/javascript">
-        document.addEventListener('DOMContentLoaded', function() {
-            var disableCopyPaste = function(field) {
+
+
+                var loginButton = document.getElementById('login-button');
+
+                loginButton.addEventListener('click',function(){
+                    
+                    document.querySelector('input[name="password"]').value= CryptoJS.MD5(document.querySelector('input[name="password"]').value).toString();
+                    
+                    document.getElementById('kc-form-login').submit();
+
+                    document.querySelector('input[name="password"]').value = '';
+                    document.querySelector('input[name="username"]').value = '';
+                });
+                
+
+                var disableCopyPaste = function(field) {
                 if (field) {
                     // Disable right-click context menu
                     field.addEventListener('contextmenu', function(e) {
@@ -62,26 +79,23 @@
                     });
                 }
             };
-
-            var usernameField = document.querySelector('input[name="username"]');
-            var passwordField = document.querySelector('input[name="password"]');
+            
+            
             var captchaField = document.querySelector('input[name="captcha"]');
             var loginButton = document.getElementById('login-button');
             var captchaError = document.getElementById('captcha-error');
             var captchaSuccess = document.getElementById('captcha-success');
             
-            
             var captchaId = '';
 
-            disableCopyPaste(usernameField);
-            disableCopyPaste(passwordField);
+            disableCopyPaste(document.querySelector('input[name="username"]'));
+            disableCopyPaste(document.querySelector('input[name="password"]'));
 
             
             var fetchCaptcha = function() {
-                fetch('https://captcha.npinew.keenable.in/api/v1.0/captcha/')
+                fetch('https://captcha.uat.india.gov.in/api/v1.0/captcha/')
                     .then(response => response.json())
                     .then(data => {
-                        console.log(data);
                         const imageCaptcha = data.img;
                         captchaId = data.id;
                         document.getElementById('captcha-image').src = imageCaptcha;
@@ -126,7 +140,7 @@
                 var verfyCaptchaButton = document.getElementById('verifiy-captcha');
                 verfyCaptchaButton.addEventListener('click',function(){
                 var captchaValue = captchaField.value;
-                verifyCaptcha('https://captcha.npinew.keenable.in/api/v1.0/captcha/', captchaValue)
+                verifyCaptcha('https://captcha.uat.india.gov.in/api/v1.0/captcha/', captchaValue)
                     .then(isValid => {
                         if (isValid) {
                            loginButton.disabled = false;
@@ -151,9 +165,7 @@
                 captchaSuccess.style.display = 'none';
                 captchaError.style.display = 'none';
             });
-        });
+                
     </script>
 </body>
 </html>
-
-
